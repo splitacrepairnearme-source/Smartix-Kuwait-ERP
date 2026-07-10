@@ -13,11 +13,19 @@ function saveToStorage() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(products));
 }
 
-function loadFromStorage() {
+async function loadFromStorage() {
   let saved = localStorage.getItem(STORAGE_KEY);
   if (saved) {
     products = JSON.parse(saved);
-  } else {
+    return;
+  }
+
+  try {
+    let response = await fetch("./products.json");
+    let masterList = await response.json();
+    products = masterList;
+    saveToStorage();
+  } catch (err) {
     products = [
       { id: 1, name: "Charger", sales: 22, stock: 15 },
       { id: 2, name: "Speaker", sales: 9, stock: 4 },
@@ -151,8 +159,11 @@ function deleteProduct(id) {
 }
 
 /* ---------- Init ---------- */
-loadFromStorage();
-renderProducts();
+async function init() {
+  await loadFromStorage();
+  renderProducts();
+}
+init();
 
 window.addProduct = addProduct;
 window.startEdit = startEdit;
