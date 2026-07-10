@@ -192,3 +192,23 @@ if (aiChatBtn) {
     alert(reply);
   });
 }
+const askAI = document.getElementById("askAI");
+
+if (askAI) {
+    askAI.onclick = function () {
+
+        const q = document.getElementById("aiQuestion").value.toLowerCase();
+        let ans = "I am still learning.";
+
+        if (q.includes("sales"))
+            ans = "Sales module is available.";
+
+        else if (q.includes("stock"))
+            ans = "Stock module is available.";
+
+        else if (q.includes("product"))
+            ans = "Products loaded successfully.";
+
+        document.getElementById("aiAnswer").innerHTML = "🤖 " + ans;
+    };
+}
