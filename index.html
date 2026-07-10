@@ -8,25 +8,36 @@
 </head>
 <body>
   <header class="header">
-  <h1>Qivenza</h1>
-  <p>Sales • Stock • Inventory Management</p>
-</header>
+    <h1>Qivenza</h1>
+    <p>Sales • Stock • Inventory Management</p>
+  </header>
 
-<div class="stats">
-  <div class="card">
-    <h3>Total Products</h3>
-    <span id="totalProducts">0</span>
+  <div class="stats">
+    <div class="card">
+      <h3>Total Products</h3>
+      <span id="totalProducts">0</span>
+    </div>
+
+    <div class="card">
+      <h3>Total Sales</h3>
+      <span id="totalSales">0</span>
+    </div>
+
+    <div class="card">
+      <h3>Low Stock</h3>
+      <span id="lowStockCount">0</span>
+    </div>
   </div>
 
-  <div class="card">
-    <h3>Total Sales</h3>
-    <span id="totalSales">0</span>
+  <div class="form-box">
+    <input type="text" id="productName" placeholder="Product Name" />
+    <input type="number" id="productSales" placeholder="Sales Qty" />
+    <input type="number" id="productStock" placeholder="Stock Qty" />
+    <button id="submitBtn" onclick="addProduct()">Add Product</button>
+    <button id="cancelEditBtn" class="secondary-btn" onclick="cancelEdit()" style="display:none;">Cancel</button>
   </div>
-</div>
 
-  <input type="text" id="productName" placeholder="Product Name" />
-  <input type="number" id="productSales" placeholder="Sales Qty" />
-  <button onclick="addProduct()">Add Product</button>
+  <input type="text" id="searchBox" placeholder="🔍 Search product..." oninput="renderProducts()" />
 
   <div id="output"></div>
 
