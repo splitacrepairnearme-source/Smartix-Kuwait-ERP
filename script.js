@@ -170,3 +170,25 @@ window.startEdit = startEdit;
 window.cancelEdit = cancelEdit;
 window.deleteProduct = deleteProduct;
 window.renderProducts = renderProducts;
+// ===== Qivenza AI Button =====
+const aiChatBtn = document.getElementById("aiChatBtn");
+
+if (aiChatBtn) {
+  aiChatBtn.addEventListener("click", function () {
+    const question = prompt("🤖 Welcome to Qivenza AI\n\nAsk your business question:");
+
+    if (!question) return;
+
+    let reply = "Sorry, I don't know that yet.";
+
+    if (question.toLowerCase().includes("stock")) {
+      reply = "📦 Opening Stock Module...";
+    } else if (question.toLowerCase().includes("sales")) {
+      reply = "💰 Opening Sales Module...";
+    } else if (question.toLowerCase().includes("product")) {
+      reply = "📱 Opening Products...";
+    }
+
+    alert(reply);
+  });
+}
