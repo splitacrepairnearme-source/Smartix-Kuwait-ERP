@@ -40,6 +40,15 @@
     <button id="submitBtn" onclick="addProduct()">Add Product</button>
     <button id="cancelEditBtn" class="secondary-btn" onclick="cancelEdit()" style="display:none;">Cancel</button>
   </div>
+<div class="ai-chat-box">
+    <h3>🤖 Qivenza AI Assistant</h3>
+
+    <textarea id="aiQuestion" placeholder="Ask anything about your business..."></textarea>
+
+    <button id="askAI">Ask Qivenza AI</button>
+
+    <div id="aiAnswer"></div>
+</div>
 
   <input type="text" id="searchBox" placeholder="🔍 Search product..." oninput="renderProducts()" />
 
