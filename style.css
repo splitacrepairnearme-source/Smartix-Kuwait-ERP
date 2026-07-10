@@ -1,155 +1,161 @@
-* {
-  box-sizing: border-box;
+/* ===== Qivenza Dashboard Logic ===== */
+
+const STORAGE_KEY = "qivenza_products";
+const LOW_STOCK_THRESHOLD = 5;
+
+let products = [];
+let editingId = null;
+
+let output = document.getElementById("output");
+
+/* ---------- Storage ---------- */
+function saveToStorage() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(products));
 }
 
-body {
-  background: #0d0f12;
-  background-image: radial-gradient(circle at top, #14171c 0%, #0d0f12 60%);
-  font-family: 'Segoe UI', Roboto, Arial, sans-serif;
-  color: #e6e6e6;
-  padding: 16px;
-  margin: 0;
-  min-height: 100vh;
-}
-
-.header {
-  text-align: center;
-  padding: 22px 16px;
-  margin-bottom: 20px;
-  background: linear-gradient(135deg, #1a1d23, #101215);
-  border: 1px solid #2a2e35;
-  border-radius: 14px;
-  box-shadow: 0 4px 14px rgba(0,0,0,0.4);
-}
-
-.header h1 {
-  margin: 0 0 6px 0;
-  font-size: 22px;
-  font-weight: 700;
-  color: #ffffff;
-  letter-spacing: 0.3px;
-}
-
-.header p {
-  margin: 0;
-  font-size: 13px;
-  color: #9aa0aa;
-  letter-spacing: 0.5px;
-  text-transform: uppercase;
-}
-
-.stats {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
-  margin-bottom: 20px;
-}
-
-.card {
-  background: linear-gradient(145deg, #16191f, #101216);
-  border: 1px solid #262a31;
-  border-radius: 12px;
-  padding: 16px;
-  text-align: center;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.35);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.card:active {
-  transform: scale(0.97);
-}
-
-.card h3 {
-  margin: 0 0 8px 0;
-  font-size: 12px;
-  font-weight: 500;
-  color: #8b92a0;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.card span {
-  font-size: 26px;
-  font-weight: 700;
-  color: #4ade80;
-}
-
-input[type="text"],
-input[type="number"] {
-  width: 100%;
-  background: #14161a;
-  border: 1px solid #2a2e35;
-  color: #f0f0f0;
-  padding: 12px 14px;
-  border-radius: 10px;
-  font-size: 15px;
-  margin-bottom: 12px;
-  outline: none;
-  transition: border-color 0.2s ease;
-}
-
-input[type="text"]::placeholder,
-input[type="number"]::placeholder {
-  color: #6b7280;
-}
-
-input[type="text"]:focus,
-input[type="number"]:focus {
-  border-color: #4ade80;
-  box-shadow: 0 0 0 3px rgba(74, 222, 128, 0.15);
-}
-
-button {
-  width: 100%;
-  background: linear-gradient(135deg, #22c55e, #16a34a);
-  color: #ffffff;
-  padding: 13px 20px;
-  border: none;
-  border-radius: 10px;
-  font-size: 16px;
-  font-weight: 600;
-  letter-spacing: 0.3px;
-  cursor: pointer;
-  box-shadow: 0 4px 12px rgba(34, 197, 94, 0.35);
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
-  margin-bottom: 16px;
-}
-
-button:hover {
-  box-shadow: 0 6px 16px rgba(34, 197, 94, 0.45);
-}
-
-button:active {
-  transform: scale(0.97);
-}
-
-#output {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-#output div {
-  background: #14161a;
-  border: 1px solid #23262d;
-  border-left: 3px solid #4ade80;
-  border-radius: 10px;
-  padding: 12px 14px;
-  font-size: 14px;
-  color: #d4d4d8;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.25);
-}
-
-@media (max-width: 400px) {
-  .header h1 {
-    font-size: 19px;
-  }
-
-  .card span {
-    font-size: 22px;
-  }
-
-  button {
-    font-size: 15px;
+function loadFromStorage() {
+  let saved = localStorage.getItem(STORAGE_KEY);
+  if (saved) {
+    products = JSON.parse(saved);
+  } else {
+    products = [
+      { id: 1, name: "Charger", sales: 22, stock: 15 },
+      { id: 2, name: "Speaker", sales: 9, stock: 4 },
+      { id: 3, name: "Cable", sales: 30, stock: 20 },
+      { id: 4, name: "Mouse", sales: 0, stock: 2 }
+    ];
+    saveToStorage();
   }
 }
+
+/* ---------- Helpers ---------- */
+function getCategory(total) {
+  if (total === 0) {
+    return "Non-Moving";
+  } else if (total < 10) {
+    return "Slow Moving";
+  } else {
+    return "Fast Moving";
+  }
+}
+
+function getNextId() {
+  return products.length ? Math.max(...products.map(p => p.id)) + 1 : 1;
+}
+
+/* ---------- Render ---------- */
+function renderProducts() {
+  let searchTerm = document.getElementById("searchBox").value.toLowerCase();
+  let filtered = products.filter(p => p.name.toLowerCase().includes(searchTerm));
+
+  output.innerHTML = "";
+
+  if (filtered.length === 0) {
+    output.innerHTML = "<div class='empty-state'>No products found.</div>";
+  }
+
+  filtered.forEach(p => {
+    let category = getCategory(p.sales);
+    let isLow = p.stock <= LOW_STOCK_THRESHOLD;
+
+    let row = document.createElement("div");
+    row.className = "product-row" + (isLow ? " low-stock" : "");
+    row.innerHTML =
+      "<div class='product-info'>" +
+        "<b>" + p.name + "</b>" +
+        "<span class='meta'>Sales: " + p.sales + " • Stock: " + p.stock + "</span>" +
+        "<span class='tag'>" + category + "</span>" +
+        (isLow ? "<span class='low-badge'>⚠ Low Stock</span>" : "") +
+      "</div>" +
+      "<div class='product-actions'>" +
+        "<button class='icon-btn edit-btn' onclick='startEdit(" + p.id + ")'>✏️</button>" +
+        "<button class='icon-btn delete-btn' onclick='deleteProduct(" + p.id + ")'>🗑️</button>" +
+      "</div>";
+
+    output.appendChild(row);
+  });
+
+  updateStats();
+}
+
+function updateStats() {
+  document.getElementById("totalProducts").textContent = products.length;
+  document.getElementById("totalSales").textContent = products.reduce((sum, p) => sum + Number(p.sales), 0);
+  document.getElementById("lowStockCount").textContent = products.filter(p => p.stock <= LOW_STOCK_THRESHOLD).length;
+}
+
+/* ---------- Add / Edit / Delete ---------- */
+function addProduct() {
+  let nameInput = document.getElementById("productName");
+  let salesInput = document.getElementById("productSales");
+  let stockInput = document.getElementById("productStock");
+
+  let name = nameInput.value.trim();
+  let saleQty = Number(salesInput.value) || 0;
+  let stockQty = Number(stockInput.value) || 0;
+
+  if (!name) {
+    alert("Please enter a product name.");
+    return;
+  }
+
+  if (editingId !== null) {
+    let product = products.find(p => p.id === editingId);
+    product.name = name;
+    product.sales = saleQty;
+    product.stock = stockQty;
+    editingId = null;
+    document.getElementById("submitBtn").textContent = "Add Product";
+    document.getElementById("cancelEditBtn").style.display = "none";
+  } else {
+    products.push({ id: getNextId(), name: name, sales: saleQty, stock: stockQty });
+  }
+
+  nameInput.value = "";
+  salesInput.value = "";
+  stockInput.value = "";
+
+  saveToStorage();
+  renderProducts();
+}
+
+function startEdit(id) {
+  let product = products.find(p => p.id === id);
+  if (!product) return;
+
+  document.getElementById("productName").value = product.name;
+  document.getElementById("productSales").value = product.sales;
+  document.getElementById("productStock").value = product.stock;
+
+  editingId = id;
+  document.getElementById("submitBtn").textContent = "Save Changes";
+  document.getElementById("cancelEditBtn").style.display = "inline-block";
+
+  document.getElementById("productName").focus();
+}
+
+function cancelEdit() {
+  editingId = null;
+  document.getElementById("productName").value = "";
+  document.getElementById("productSales").value = "";
+  document.getElementById("productStock").value = "";
+  document.getElementById("submitBtn").textContent = "Add Product";
+  document.getElementById("cancelEditBtn").style.display = "none";
+}
+
+function deleteProduct(id) {
+  if (!confirm("Delete this product?")) return;
+  products = products.filter(p => p.id !== id);
+  saveToStorage();
+  renderProducts();
+}
+
+/* ---------- Init ---------- */
+loadFromStorage();
+renderProducts();
+
+window.addProduct = addProduct;
+window.startEdit = startEdit;
+window.cancelEdit = cancelEdit;
+window.deleteProduct = deleteProduct;
+window.renderProducts = renderProducts;
